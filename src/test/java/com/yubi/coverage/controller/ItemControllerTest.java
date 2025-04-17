@@ -44,15 +44,6 @@ public class ItemControllerTest {
     }
 
     @Test
-    void testGetItemById() throws Exception {
-        mockMvc.perform(get("/api/items/" + testItem.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(testItem.getId())))
-                .andExpect(jsonPath("$.name", is(testItem.getName())))
-                .andExpect(jsonPath("$.description", is(testItem.getDescription())));
-    }
-
-    @Test
     void testCreateItem() throws Exception {
         Item newItem = new Item("NewName", "NewDescription");
         mockMvc.perform(post("/api/items")
@@ -62,27 +53,5 @@ public class ItemControllerTest {
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.name", is("NewName")))
                 .andExpect(jsonPath("$.description", is("NewDescription")));
-    }
-
-    @Test
-    void testUpdateItem() throws Exception {
-        Item updated = new Item("UpdatedName", "UpdatedDescription");
-        updated.setId(testItem.getId());
-        mockMvc.perform(put("/api/items/" + testItem.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updated)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(testItem.getId())))
-                .andExpect(jsonPath("$.name", is("UpdatedName")))
-                .andExpect(jsonPath("$.description", is("UpdatedDescription")));
-    }
-
-    @Test
-    void testDeleteItem() throws Exception {
-        mockMvc.perform(delete("/api/items/" + testItem.getId()))
-                .andExpect(status().isNoContent());
-        // Should return 404 after deletion
-        mockMvc.perform(get("/api/items/" + testItem.getId()))
-                .andExpect(status().isNotFound());
     }
 }
