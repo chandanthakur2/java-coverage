@@ -1,7 +1,7 @@
 GRADLE := ./gradlew
 
 build:
-	$(GRADLE) clean build
+	$(GRADLE) build
 
 test:
 	$(GRADLE) test
@@ -18,4 +18,4 @@ report:
 clean:
 	$(GRADLE) clean
 
-all: build test run
+all: clean build run
