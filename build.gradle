@@ -22,6 +22,12 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// JaCoCo dependencies for runtime coverage
+	implementation 'org.jacoco:org.jacoco.core:0.8.11'
+	implementation 'org.jacoco:org.jacoco.report:0.8.11'
+	// JaCoCo agent for runtime coverage
+	jacocoAgent "org.jacoco:org.jacoco.agent:0.8.11:runtime"
 }
 
 tasks.named('test') {

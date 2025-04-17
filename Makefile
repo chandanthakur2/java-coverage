@@ -7,7 +7,7 @@ test:
 	$(GRADLE) test
 
 run:
-	java "-javaagent:jacocoagent.jar=destfile=build/jacoco/runtime.exec,includes=com.yubi.coverage.*,append=true" -jar build/libs/coverage-0.0.1-SNAPSHOT.jar
+	java -javaagent:jacocoagent.jar=output=tcpserver,address=*,port=6300,includes=com.yubi.coverage.* -jar build/libs/coverage-0.0.1-SNAPSHOT.jar
 
 report:
 	java -jar jacococli.jar report build/jacoco/runtime.exec \
