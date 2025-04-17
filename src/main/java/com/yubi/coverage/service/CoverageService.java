@@ -12,6 +12,7 @@ import org.jacoco.report.IReportVisitor;
 import org.jacoco.report.html.HTMLFormatter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import java.io.FileWriter;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -189,6 +190,8 @@ public class CoverageService {
             // Create the report
             visitor.visitBundle(coverageBuilder.getBundle(packageIncludes), sourceFileLocator);
             visitor.visitEnd();
+
+            generateJsonReport(reportDirectory, coverageBuilder);
             
             System.out.println("Coverage report generated successfully at: " + reportDirectory.getAbsolutePath() + "/index.html");
             return reportDirectory.getAbsolutePath() + "/index.html";
@@ -200,6 +203,87 @@ public class CoverageService {
             e.printStackTrace();
             throw new IOException("Failed to generate coverage report: " + e.getMessage(), e);
         }
+    }
+
+    private void generateJsonReport(File reportDirectory, org.jacoco.core.analysis.CoverageBuilder coverageBuilder) throws IOException {
+        File jsonFile = new File(reportDirectory, "jacoco.json");
+        
+        // Get the bundle from the coverage builder
+        org.jacoco.core.analysis.IBundleCoverage bundle = coverageBuilder.getBundle(packageIncludes);
+        
+        // Create a simplified JSON structure with only overall coverage data
+        StringBuilder json = new StringBuilder();
+        json.append("{\n");
+        json.append("  \"timestamp\": \"" + new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new java.util.Date()) + "\",\n");
+        json.append("  \"name\": \"" + bundle.getName() + "\",\n");
+        json.append("  \"coverage\": {\n");
+        
+        // Instruction coverage
+        json.append("    \"instruction\": {\n");
+        json.append("      \"covered\": " + bundle.getInstructionCounter().getCoveredCount() + ",\n");
+        json.append("      \"total\": " + bundle.getInstructionCounter().getTotalCount() + ",\n");
+        json.append("      \"percentage\": " + formatPercentage(bundle.getInstructionCounter()) + "\n");
+        json.append("    },\n");
+        
+        // Branch coverage
+        json.append("    \"branch\": {\n");
+        json.append("      \"covered\": " + bundle.getBranchCounter().getCoveredCount() + ",\n");
+        json.append("      \"total\": " + bundle.getBranchCounter().getTotalCount() + ",\n");
+        json.append("      \"percentage\": " + formatPercentage(bundle.getBranchCounter()) + "\n");
+        json.append("    },\n");
+        
+        // Line coverage
+        json.append("    \"line\": {\n");
+        json.append("      \"covered\": " + bundle.getLineCounter().getCoveredCount() + ",\n");
+        json.append("      \"total\": " + bundle.getLineCounter().getTotalCount() + ",\n");
+        json.append("      \"percentage\": " + formatPercentage(bundle.getLineCounter()) + "\n");
+        json.append("    },\n");
+        
+        // Method coverage
+        json.append("    \"method\": {\n");
+        json.append("      \"covered\": " + bundle.getMethodCounter().getCoveredCount() + ",\n");
+        json.append("      \"total\": " + bundle.getMethodCounter().getTotalCount() + ",\n");
+        json.append("      \"percentage\": " + formatPercentage(bundle.getMethodCounter()) + "\n");
+        json.append("    },\n");
+        
+        // Class coverage
+        json.append("    \"class\": {\n");
+        json.append("      \"covered\": " + bundle.getClassCounter().getCoveredCount() + ",\n");
+        json.append("      \"total\": " + bundle.getClassCounter().getTotalCount() + ",\n");
+        json.append("      \"percentage\": " + formatPercentage(bundle.getClassCounter()) + "\n");
+        json.append("    }\n");
+        
+        json.append("  }\n");
+        json.append("}\n");
+        
+        // Write JSON to file
+        try (FileWriter writer = new FileWriter(jsonFile)) {
+            writer.write(json.toString());
+        }
+        
+        System.out.println("JSON report generated successfully at: " + jsonFile.getAbsolutePath());
+    }
+    
+    /**
+     * Formats coverage percentage
+     */
+    private String formatCoverage(org.jacoco.core.analysis.ICounter counter) {
+        if (counter.getTotalCount() == 0) {
+            return "\"0.0%\"";
+        }
+        double percentage = (double) counter.getCoveredCount() / counter.getTotalCount() * 100;
+        return "\"" + String.format("%.1f%%", percentage) + "\"";
+    }
+    
+    /**
+     * Formats coverage percentage as a number
+     */
+    private String formatPercentage(org.jacoco.core.analysis.ICounter counter) {
+        if (counter.getTotalCount() == 0) {
+            return "0.0";
+        }
+        double percentage = (double) counter.getCoveredCount() / counter.getTotalCount() * 100;
+        return String.format("%.1f", percentage);
     }
 
     /**

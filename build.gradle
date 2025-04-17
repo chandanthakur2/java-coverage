@@ -39,5 +39,7 @@ jacocoTestReport {
 	dependsOn test // Ensures the tests are run before generating the report
 	reports {
 		html.required = true // HTML report for easy visualization
+		xml.required = true // XML report for CI integration
+		csv.required = true // CSV report for data processing
 	}
 }
